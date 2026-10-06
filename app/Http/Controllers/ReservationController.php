@@ -113,14 +113,13 @@ class ReservationController extends Controller
             $request->session()->put('reservation_submission_keys', array_slice($submissionMap, -20, null, true));
         }
 
-        $mailSent = false;
-        $mailError = null;
+        $mailQueued = false;
 
         try {
-            Mail::to($reservation->email, $reservation->full_name)->send(new ReservationConfirmationMail($reservation));
-            $mailSent = ! in_array(config('mail.default'), ['log', 'array'], true);
+            Mail::to($reservation->email, $reservation->full_name)
+                ->queue((new ReservationConfirmationMail($reservation))->onConnection('background'));
+            $mailQueued = true;
         } catch (\Throwable $exception) {
-            $mailError = $exception;
             report($exception);
         }
 
@@ -130,13 +129,10 @@ class ReservationController extends Controller
         $request->session()->flash('reservation_status', 'pending');
 
         $message = 'Your reservation request has been received. Your reservation ID is '.$reservation->reservation_code.'. Please keep this code to check your reservation status.';
-
-        if ($mailSent) {
-            $message .= ' A confirmation email was sent to '.$reservation->email.'.';
-        } elseif (in_array(config('mail.default'), ['log', 'array'], true)) {
-            $message .= ' Email delivery is not enabled yet; configure Gmail SMTP to receive this ID by email.';
+        if ($mailQueued) {
+            $message .= ' A confirmation email is being sent to '.$reservation->email.'.';
         } else {
-            $message .= ' We could not send the confirmation email; please keep this ID and contact us if needed.';
+            $message .= ' We could not queue the confirmation email; please keep this ID and contact us if needed.';
         }
 
         // Redirecting through the existing ?code= lookup (used by PublicController::reservation)

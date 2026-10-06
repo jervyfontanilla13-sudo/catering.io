@@ -217,7 +217,7 @@ Create a deployment-specific `.env` from `.env.example`; the `.env` file is not 
 | `MAIL_MAILER`, `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_FROM_ADDRESS`, `MAIL_FROM_NAME` | Outbound email transport and sender identity. Use provider-issued credentials, not a personal account password. |
 | `RECAPTCHA_SITE_KEY`, `RECAPTCHA_SECRET_KEY` | Public reCAPTCHA widget key and server-side verification secret. These are read from `config/services.php`; add them privately to `.env` and do not expose the secret key. |
 | `FILESYSTEM_DISK` | Default filesystem disk; the local private disk is the default. Gallery images explicitly use the public disk. |
-| `CACHE_STORE`, `QUEUE_CONNECTION` | Laravel cache and queue drivers. Configure their backing stores/tables according to the chosen deployment. Current customer notification sends use the configured mail transport directly. |
+| `CACHE_STORE`, `QUEUE_CONNECTION` | Laravel cache and queue drivers. Configure their backing stores/tables according to the chosen deployment. Public reservation confirmation and admin notification emails use Laravel's background queue connection so SMTP delays do not hold up reservation submission. |
 
 The example environment file provides safe placeholders, not working production credentials. Validate that the required tables for database-backed sessions, cache, or queues exist before selecting those drivers.
 

@@ -101,11 +101,12 @@ class NewReservationAdminNotificationTest extends TestCase
         $this->post(route('reservation.store'), $payload)->assertRedirect();
 
         $reservation = Reservation::query()->where('email', 'client@example.com')->firstOrFail();
-        Mail::assertSentTimes(NewReservationAdminMail::class, 2);
-        Mail::assertSent(NewReservationAdminMail::class, function (NewReservationAdminMail $mail) use ($primaryAdmin, $reservation): bool {
+        Mail::assertQueuedTimes(NewReservationAdminMail::class, 2);
+        Mail::assertQueued(NewReservationAdminMail::class, function (NewReservationAdminMail $mail) use ($primaryAdmin, $reservation): bool {
             $rendered = $mail->render();
 
             return $mail->hasTo($primaryAdmin->email)
+                && $mail->connection === 'background'
                 && $mail->envelope()->subject === 'New Reservation Received – 3YOS Catering Management System'
                 && str_contains($rendered, 'Jamie Client')
                 && str_contains($rendered, (string) $reservation->id)
@@ -121,18 +122,20 @@ class NewReservationAdminNotificationTest extends TestCase
                 && str_contains($rendered, $reservation->created_at->timezone(config('app.timezone'))->format('F j, Y \a\t g:i A'))
                 && str_contains($rendered, route('admin.reservations.show', $reservation));
         });
-        Mail::assertSent(NewReservationAdminMail::class, fn (NewReservationAdminMail $mail): bool => $mail->hasTo($secondPrimaryAdmin->email));
-        Mail::assertNotSent(NewReservationAdminMail::class, fn (NewReservationAdminMail $mail): bool => $mail->hasTo($disabled->email));
-        Mail::assertNotSent(NewReservationAdminMail::class, fn (NewReservationAdminMail $mail): bool => $mail->hasTo('team-admin@example.com'));
-        Mail::assertSent(ReservationConfirmationMail::class, fn (ReservationConfirmationMail $mail): bool => $mail->hasTo('client@example.com'));
+        Mail::assertQueued(NewReservationAdminMail::class, fn (NewReservationAdminMail $mail): bool => $mail->hasTo($secondPrimaryAdmin->email)
+            && $mail->connection === 'background');
+        Mail::assertNotQueued(NewReservationAdminMail::class, fn (NewReservationAdminMail $mail): bool => $mail->hasTo($disabled->email));
+        Mail::assertNotQueued(NewReservationAdminMail::class, fn (NewReservationAdminMail $mail): bool => $mail->hasTo('team-admin@example.com'));
+        Mail::assertQueued(ReservationConfirmationMail::class, fn (ReservationConfirmationMail $mail): bool => $mail->hasTo('client@example.com')
+            && $mail->connection === 'background');
         $this->assertNotSame($disabled->email, $primaryAdmin->email);
 
         $this->from(route('reservation'))->post(route('reservation.store'), $payload)
             ->assertRedirect(route('reservation', ['code' => $reservation->reservation_code]));
 
-        Mail::assertSentTimes(NewReservationAdminMail::class, 2);
+        Mail::assertQueuedTimes(NewReservationAdminMail::class, 2);
         $this->assertSame(4, Reservation::whereDate('event_date', $eventDate)->count());
-        Mail::assertSent(ReservationConfirmationMail::class, 1);
+        Mail::assertQueued(ReservationConfirmationMail::class, 1);
     }
 
     public function test_primary_admin_handover_changes_the_recipient_for_future_reservations(): void
@@ -157,15 +160,16 @@ class NewReservationAdminNotificationTest extends TestCase
         $firstAdmin->update(['is_active' => false]);
         app(PrimaryAdminReservationNotifier::class)->notify($reservation);
 
-        Mail::assertSentTimes(NewReservationAdminMail::class, 3);
-        Mail::assertSent(NewReservationAdminMail::class, fn (NewReservationAdminMail $mail): bool => $mail->hasTo($firstAdmin->email));
+        Mail::assertQueuedTimes(NewReservationAdminMail::class, 3);
+        Mail::assertQueued(NewReservationAdminMail::class, fn (NewReservationAdminMail $mail): bool => $mail->hasTo($firstAdmin->email)
+            && $mail->connection === 'background');
         $this->assertSame(
             2,
-            Mail::sent(NewReservationAdminMail::class)->filter(
+            Mail::queued(NewReservationAdminMail::class)->filter(
                 fn (NewReservationAdminMail $mail): bool => $mail->hasTo($nextAdmin->email)
             )->count(),
         );
-        Mail::assertNotSent(NewReservationAdminMail::class, fn (NewReservationAdminMail $mail): bool => $mail->hasTo('team-admin@example.com'));
+        Mail::assertNotQueued(NewReservationAdminMail::class, fn (NewReservationAdminMail $mail): bool => $mail->hasTo('team-admin@example.com'));
     }
 
     public function test_invalid_reservation_submission_does_not_send_a_notification(): void
@@ -224,7 +228,7 @@ class NewReservationAdminNotificationTest extends TestCase
             'status' => Reservation::STATUS_PENDING,
         ]);
         $pendingMail = \Mockery::mock(\Illuminate\Mail\PendingMail::class);
-        $pendingMail->shouldReceive('send')
+        $pendingMail->shouldReceive('queue')
             ->once()
             ->with(\Mockery::type(NewReservationAdminMail::class));
 

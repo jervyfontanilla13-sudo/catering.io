@@ -8,6 +8,7 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Throwable;
 
 class NewReservationAdminMail extends Mailable
 {
@@ -26,5 +27,10 @@ class NewReservationAdminMail extends Mailable
             view: 'emails.new-reservation-admin',
             with: ['reservation' => $this->reservation],
         );
+    }
+
+    public function failed(Throwable $exception): void
+    {
+        report($exception);
     }
 }

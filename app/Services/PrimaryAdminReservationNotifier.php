@@ -42,7 +42,7 @@ class PrimaryAdminReservationNotifier
 
             try {
                 Mail::to($primaryAdmin->email, $primaryAdmin->name)
-                    ->send(new NewReservationAdminMail($reservation));
+                    ->queue((new NewReservationAdminMail($reservation))->onConnection('background'));
             } catch (\Throwable $exception) {
                 report($exception);
             }
