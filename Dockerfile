@@ -55,7 +55,7 @@ FROM php-base AS runtime
 
 WORKDIR /var/www/html
 COPY --from=build --chown=www-data:www-data /var/www/html /var/www/html
-COPY docker/entrypoint.sh /usr/local/bin/railway-entrypoint
+COPY railway-entrypoint.sh /usr/local/bin/railway-entrypoint
 RUN chmod +x /usr/local/bin/railway-entrypoint
 
 ENTRYPOINT ["railway-entrypoint"]
