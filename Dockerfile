@@ -18,8 +18,9 @@ RUN apt-get update \
         libzip-dev \
         unzip \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j"$(nproc)" dom \
-    && docker-php-ext-install -j"$(nproc)" bcmath curl gd intl mbstring opcache pdo_mysql xml xmlreader xmlwriter zip \
+    && docker-php-ext-install dom \
+    && docker-php-ext-install -j"$(nproc)" bcmath curl gd intl mbstring opcache pdo_mysql xml xmlwriter zip \
+    && docker-php-ext-install xmlreader \
     && a2enmod rewrite \
     && rm -rf /var/lib/apt/lists/*
 
