@@ -53,6 +53,28 @@ class AdminHeaderTest extends TestCase
         Carbon::setTestNow();
     }
 
+    public function test_sidebar_theme_controls_stay_outside_the_scrollable_navigation(): void
+    {
+        $response = $this->withSession(self::ADMIN)->get(route('admin.reservations'));
+
+        $response->assertOk();
+        $content = $response->getContent();
+        $navEnd = strpos($content, '</nav>', strpos($content, '<aside class="sidebar'));
+        $utilityStart = strpos($content, '<div class="sidebar-utility">');
+
+        $this->assertNotFalse($navEnd);
+        $this->assertNotFalse($utilityStart);
+        $this->assertLessThan($utilityStart, $navEnd);
+
+        $styles = file_get_contents(public_path('css/admin-workspace.css'));
+        $this->assertIsString($styles);
+        $navStylesStart = strpos($styles, '.sidebar nav {');
+        $navStylesEnd = strpos($styles, '}', $navStylesStart);
+        $this->assertNotFalse($navStylesStart);
+        $this->assertNotFalse($navStylesEnd);
+        $this->assertStringContainsString('overflow-y: auto;', substr($styles, $navStylesStart, $navStylesEnd - $navStylesStart));
+    }
+
     public function test_admin_header_scrolls_naturally_with_main_content(): void
     {
         $response = $this->withSession(self::ADMIN)->get(route('admin.reservations'));

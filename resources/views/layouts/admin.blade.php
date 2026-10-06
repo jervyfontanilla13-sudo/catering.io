@@ -81,6 +81,7 @@
         <a class="nav-link {{ request()->routeIs('admin.support*') ? 'active' : '' }}" href="{{ route('admin.support') }}" target="_blank" rel="noopener" @if(request()->routeIs('admin.support*')) aria-current="page" @endif>
             <span class="sidebar-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M9.3 9a2.7 2.7 0 0 1 5.2.9c0 1.8-2.5 2-2.5 3.6"/><path d="M12 17.2h.01"/></svg></span><span>Support</span>
         </a>
+        </nav>
         <div class="sidebar-utility">
             <button class="nav-link sidebar-utility-button theme-toggle" id="themeToggle" type="button" aria-label="Enable dark mode" title="Enable dark mode" aria-pressed="false">
                 <span class="sidebar-icon" aria-hidden="true">&#9790;</span><span>Dark Mode</span>
@@ -92,7 +93,6 @@
                 </button>
             </form>
         </div>
-        </nav>
         <form id="manageWebsiteAuthForm" class="d-none" method="POST" action="{{ route('admin.manage-website.reauthenticate') }}" data-password-confirm data-password-title="Unlock Manage Website" data-password-label="Current administrator password" data-password-button="Unlock" data-password-message="{{ $errors->first('manage_website_password') ?: 'Enter your current administrator password to access Packages, Services, and Gallery.' }}">
             @csrf
             <input type="hidden" name="return_to" value="{{ session('manage_website_return_to', request()->getRequestUri()) }}">
