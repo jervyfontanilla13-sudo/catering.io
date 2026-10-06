@@ -17,12 +17,17 @@ RUN apt-get update \
         libxml2-dev \
         libzip-dev \
         unzip \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install dom \
-    && docker-php-ext-install -j"$(nproc)" bcmath curl gd intl mbstring opcache pdo_mysql xml xmlwriter zip \
-    && docker-php-ext-install xmlreader \
-    && a2enmod rewrite \
     && rm -rf /var/lib/apt/lists/*
+
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg
+
+RUN docker-php-ext-install -j"$(nproc)" dom
+
+RUN docker-php-ext-install -j"$(nproc)" bcmath curl gd intl mbstring opcache pdo_mysql xml xmlwriter zip
+
+RUN docker-php-ext-install xmlreader
+
+RUN a2enmod rewrite
 
 RUN sed -ri \
     -e 's!/var/www/html!/var/www/html/public!g' \
