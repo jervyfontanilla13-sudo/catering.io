@@ -116,6 +116,8 @@ body.dark-mode .attention-item-count{background:rgba(146,99,0,.28);color:#f7d57a
 .quick-action{display:inline-flex;min-height:40px;align-items:center;justify-content:space-between;gap:.8rem;padding:.55rem .8rem;border:1px solid var(--line);border-radius:7px;background:var(--surface);color:var(--ink);font-size:.8rem;font-weight:700;text-decoration:none;transition:border-color .15s ease,background .15s ease}
 .quick-action:hover{border-color:var(--teal);background:var(--mint);color:var(--ink)}
 .quick-action span{color:var(--teal-dark);font-size:1rem}
+body.dark-mode .today-upcoming-group h3,body.dark-mode .operations-row strong,body.dark-mode .quick-action span{color:#76c8bf}
+body.dark-mode .calendar-capacity:not(.calendar-capacity--full){color:#76c8bf}
 .calendar-card{overflow:visible}
 .calendar-legend{display:flex;align-items:center;flex-wrap:wrap;gap:.9rem;color:var(--muted);font-size:.72rem;font-weight:700}
 .calendar-legend span{display:inline-flex;align-items:center;gap:.35rem}
