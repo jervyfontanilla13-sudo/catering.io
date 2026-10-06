@@ -17,6 +17,11 @@ RUN apt-get update \
         libxml2-dev \
         libzip-dev \
         unzip \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j"$(nproc)" bcmath curl gd intl mbstring opcache pdo_mysql zip \
+    && a2dismod mpm_event mpm_worker \
+    && a2enmod mpm_prefork rewrite \
+    && apache2ctl -t \
     && rm -rf /var/lib/apt/lists/*
 
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg
@@ -60,7 +65,7 @@ FROM php-base AS runtime
 
 WORKDIR /var/www/html
 COPY --from=build --chown=www-data:www-data /var/www/html /var/www/html
-COPY docker/entrypoint.sh /usr/local/bin/railway-entrypoint
+COPY railway-entrypoint.sh /usr/local/bin/railway-entrypoint
 RUN chmod +x /usr/local/bin/railway-entrypoint
 
 ENTRYPOINT ["railway-entrypoint"]
