@@ -280,6 +280,16 @@ npm run build
 
    Rebuild the configuration cache whenever deployment environment configuration changes. Keep production logs, backups, database files, and private uploads access-restricted; maintain tested off-host backups.
 
+### Railway deployment
+
+This repository includes a Railway Docker deployment using PHP 8.3 with the ZIP and MySQL PDO extensions, a Vite asset build, and Apache listening on Railway's `PORT`. The container entrypoint runs `php artisan migrate --force` before Apache starts, so migration errors stop the app from becoming healthy. Migrations run after the Railway storage volume is mounted because one migration moves legacy service-contract files between storage disks.
+
+1. Set the Railway service's **Root Directory** to the directory containing this `README.md`, `composer.json`, and `Dockerfile`.
+2. Add a Railway MySQL service and connect the web service to its private network. In the web service variables, set `DB_CONNECTION=mysql` and `DB_URL` to a Railway reference to the MySQL service's `MYSQL_URL` (for example, `${{MySQL.MYSQL_URL}}`, substituting the actual service name).
+3. Set the production Laravel variables privately in Railway: `APP_ENV=production`, `APP_DEBUG=false`, the deployed HTTPS `APP_URL`, a stable generated `APP_KEY`, `SESSION_SECURE_COOKIE=true`, and any needed SMTP, reCAPTCHA, and first-admin setup credentials. Never commit `.env` or paste credentials into source files.
+4. Before the first deployment, add a Railway volume mounted at `/var/www/html/storage` to retain uploads, private files, and local logs. Without persistent storage or an external object store, files written to the container filesystem are ephemeral. If an existing deployment already contains uploads or backups, back them up and migrate them to the persistent volume before switching traffic.
+5. Deploy the web service. Railway builds the Docker image, runs migrations at container startup, and starts Apache only after they succeed. Create the first Primary Admin at `/admin/setup`, then remove `PRIMARY_ADMIN_SETUP_KEY`.
+
 ## Turnover checklist
 
 - Transfer control of hosting, DNS, database, SMTP, reCAPTCHA, and source-control accounts to the designated system owner; remove departing operators' access.
