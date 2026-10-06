@@ -75,6 +75,14 @@ class AdminHeaderTest extends TestCase
         $this->assertStringContainsString('overflow-y: auto;', substr($styles, $navStylesStart, $navStylesEnd - $navStylesStart));
     }
 
+    public function test_table_hover_uses_the_active_theme_background(): void
+    {
+        $styles = file_get_contents(public_path('css/admin-workspace.css'));
+        $this->assertIsString($styles);
+        $this->assertStringContainsString('.table tbody tr:hover { --bs-table-bg: var(--bs-table-hover-bg); }', $styles);
+        $this->assertStringContainsString('body.dark-mode .table { --bs-table-color: var(--ink); --bs-table-bg: transparent; --bs-table-hover-bg: #213640;', $styles);
+    }
+
     public function test_admin_header_scrolls_naturally_with_main_content(): void
     {
         $response = $this->withSession(self::ADMIN)->get(route('admin.reservations'));

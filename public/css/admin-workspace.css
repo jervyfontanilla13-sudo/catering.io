@@ -290,7 +290,7 @@ body.dark-mode .badge-soft--warn { border-color: rgba(247, 213, 122, .3); backgr
 .table thead th { padding: .75rem var(--cell-pad-x); border-bottom: 1px solid var(--line); color: #6d7c86; font-size: inherit; font-weight: 800; line-height: 1.3; vertical-align: middle; white-space: nowrap; }
 .table tbody td { padding: var(--cell-pad-y) var(--cell-pad-x); border-color: #e8edef; line-height: 1.4; vertical-align: middle; }
 .table tbody tr:last-child td { border-bottom: 0; }
-.table tbody tr:hover { --bs-table-bg: #f6f9fa; }
+.table tbody tr:hover { --bs-table-bg: var(--bs-table-hover-bg); }
 .table td small { font-size: .78rem; }
 .table .form-control-sm, .table .form-select-sm { height: var(--control-h-sm); }
 /* Spinner arrows eat a third of a compact numeric cell; keyboard arrows still step the value. */
