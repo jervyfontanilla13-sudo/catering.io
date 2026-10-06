@@ -1,0 +1,31 @@
+{
+    "version": 2,
+    "buildCommand": "npm run build",
+    "env": {
+        "TMPDIR": "/tmp",
+        "TMP": "/tmp"
+    },
+    "builds": [
+        {
+            "src": "api/index.php",
+            "use": "vercel-php@0.7.3"
+        }
+    ],
+    "routes": [
+        {
+            "src": "/build/(.*)",
+            "dest": "/public/build/$1",
+            "headers": {
+                "cache-control": "public, max-age=31536000, immutable"
+            }
+        },
+        {
+            "src": "/images/(.*)",
+            "dest": "/public/images/$1"
+        },
+        {
+            "src": "/(.*)",
+            "dest": "api/index.php"
+        }
+    ]
+}

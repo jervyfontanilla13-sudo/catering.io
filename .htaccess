@@ -1,0 +1,11 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Redirect the project URL to Laravel's public web root.
+    RewriteCond %{REQUEST_URI} !/public(/|$)
+    RewriteRule ^$ %{REQUEST_URI}public/ [R=302,L]
+
+    # Keep non-root paths available through the public front controller.
+    RewriteCond %{REQUEST_URI} !/public(/|$)
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
