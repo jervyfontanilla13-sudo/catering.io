@@ -19,13 +19,9 @@ RUN apt-get update \
         unzip \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j"$(nproc)" bcmath curl gd intl mbstring opcache pdo_mysql zip \
-    && for module_file in /etc/apache2/mods-enabled/mpm_*.load; do \
-        [ -e "$module_file" ] || continue; \
-        module="${module_file##*/}"; \
-        module="${module%.load}"; \
-        if [ "$module" != "mpm_prefork" ]; then a2dismod "$module"; fi; \
-    done \
+    && a2dismod mpm_event mpm_worker \
     && a2enmod mpm_prefork rewrite \
+    && apache2ctl -t \
     && rm -rf /var/lib/apt/lists/*
 
 RUN sed -ri \
